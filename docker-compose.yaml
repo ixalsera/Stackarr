@@ -11,8 +11,6 @@ services:
       - ./series:/tv
       - ./downloads:/downloads
     network_mode: service:wireguard
-    # ports:
-    #   - 8989:8989
     restart: unless-stopped
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -26,8 +24,6 @@ services:
       - ./movies:/movies
       - ./downloads:/downloads
     network_mode: service:wireguard
-    # ports:
-    #   - 7878:7878
     restart: unless-stopped
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -39,8 +35,6 @@ services:
     volumes:
       - ./config/prowlarr:/config
     network_mode: service:wireguard
-    # ports:
-    #   - 9696:9696
     restart: unless-stopped
   transmission:
     image: lscr.io/linuxserver/transmission:latest
@@ -53,10 +47,6 @@ services:
       - ./config/transmission:/config
       - ./downloads:/downloads
     network_mode: service:wireguard
-    # ports:
-      # - 9091:9091
-      # - 51413:51413
-      # - 51413:51413/udp
     restart: unless-stopped
   wireguard:
     image: lscr.io/linuxserver/wireguard:latest
@@ -72,7 +62,10 @@ services:
       - ./config/wireguard:/config
       - /lib/modules:/lib/modules #optional
     ports:
-      - 51820:51820/udp
+      - 8989:8989 # Sonarr
+      - 7878:7878 # Radarr
+      - 9696:9696 # Prowlarr
+      - 9091:9091 # Transmission
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
