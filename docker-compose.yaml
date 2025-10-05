@@ -10,8 +10,11 @@ services:
       - ./config/sonarr:/config
       - ./series:/tv
       - ./downloads:/downloads
-    network_mode: service:wireguard
+      - ./scripts:/scripts
     restart: unless-stopped
+    post_start:
+      - command: /scripts/set_wg_route.sh
+        privileged: true
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -23,8 +26,11 @@ services:
       - ./config/radarr:/config
       - ./movies:/movies
       - ./downloads:/downloads
-    network_mode: service:wireguard
+      - ./scripts:/scripts
     restart: unless-stopped
+    post_start:
+      - command: /scripts/set_wg_route.sh
+        privileged: true
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -34,8 +40,11 @@ services:
       - TZ=Etc/UTC
     volumes:
       - ./config/prowlarr:/config
-    network_mode: service:wireguard
+      - ./scripts:/scripts
     restart: unless-stopped
+    post_start:
+      - command: /scripts/set_wg_route.sh
+        privileged: true
   transmission:
     image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
@@ -46,26 +55,22 @@ services:
     volumes:
       - ./config/transmission:/config
       - ./downloads:/downloads
-    network_mode: service:wireguard
+      - ./scripts:/scripts
     restart: unless-stopped
+    post_start:
+      - command: /scripts/set_wg_route.sh
+        privileged: true
   wireguard:
     image: lscr.io/linuxserver/wireguard:latest
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE #optional
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
       - ./config/wireguard:/config
-      - /lib/modules:/lib/modules #optional
-    ports:
-      - 8989:8989 # Sonarr
-      - 7878:7878 # Radarr
-      - 9696:9696 # Prowlarr
-      - 9091:9091 # Transmission
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
