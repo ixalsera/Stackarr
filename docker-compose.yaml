@@ -15,6 +15,10 @@ services:
     post_start:
       - command: /scripts/set_wg_route.sh
         privileged: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.localhost`)"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -31,6 +35,10 @@ services:
     post_start:
       - command: /scripts/set_wg_route.sh
         privileged: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.localhost`)"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -45,6 +53,10 @@ services:
     post_start:
       - command: /scripts/set_wg_route.sh
         privileged: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.localhost`)"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
   transmission:
     image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
@@ -60,6 +72,10 @@ services:
     post_start:
       - command: /scripts/set_wg_route.sh
         privileged: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.rule=Host(`transmission.localhost`)"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
   wireguard:
     image: lscr.io/linuxserver/wireguard:latest
     container_name: wireguard
@@ -74,3 +90,19 @@ services:
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
